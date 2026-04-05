@@ -1,0 +1,5 @@
+model: Logistic Regression
+use_scaler: True
+auc_lr: 0.8845315904139432
+auc_rf: 0.840958605664488
+features: ['dist_airport_km', 'dist_military_km', 'dist_landfill_km', 'dist_wwtp_km', 'dist_industrial_km', 'is_groundwater', 'landfills_within_5km', 'industrial_within_5km']

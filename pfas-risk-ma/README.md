@@ -1,102 +1,180 @@
-# pfas-risk-ma
+# Massachusetts PFAS Contamination Risk Prediction & Environmental Justice Analysis
 
-Massachusetts PFAS Risk Prediction & Environmental Justice Analysis.
+An interactive screening tool for Massachusetts public water systems that
+combines EPA UCMR 5 monitoring data with proximity-based risk modeling,
+MassDEP 21E contaminated-site cross-referencing, and state-defined
+environmental justice criteria to identify high-priority untested systems.
 
-A screening-level model that predicts PFAS-detection risk for the ~1,600
-Massachusetts public water systems that have NOT been sampled under EPA UCMR 5,
-using distance-based features to known PFAS sources (airports, military sites,
-landfills, POTW outfalls, and industrial dischargers), and tests whether the
-high-risk population disproportionately serves EJ communities.
+## Key findings
 
-## Data sources
+- **143 of 263** UCMR 5–tested Massachusetts public water systems had at
+  least one PFAS detection (54%).
+- **106 systems** ever exceeded the federal PFOA/PFOS MCL of 4 ppt, and
+  **34 systems** exceeded the Massachusetts PFAS6 MMCL of 20 ppt.
+- The risk-prediction model (logistic regression, 5-fold CV AUC 0.60,
+  test AUC 0.89) identified **142 untested systems as high risk** and an
+  additional **4 as very high risk** out of 1,598 scored.
+- **Seven MassDEP 21E contaminated sites** with PFAS-relevant histories
+  fall inside the Zone II or IWPA source-water protection area of an
+  untested Massachusetts public water system.
+- **Untested systems serving environmental-justice communities are 5.3×
+  more likely to be classified high risk** than those serving non-EJ
+  communities (42.9% vs 8.1%; χ² = 65.1, p < 0.0001; Mann-Whitney U
+  p < 0.0001).
 
-| Source | Dataset | URL | Downloaded |
-|---|---|---|---|
-| EPA | UCMR 5 occurrence data (by-state zip, `UCMR5_All_MA_WY.txt`) | https://www.epa.gov/system/files/other-files/2023-08/ucmr5-occurrence-data-by-state.zip | 2026-04-04 |
-| MassGIS | Public Water Supply Sources (`PWSDEP_PT.shp`) | `shapefiles/state/pwsdep_pt.zip` | 2026-04-04 |
-| MassGIS | 2020 Environmental Justice Populations (`EJ_POLY.shp`) | `shapefiles/census2020/ej2020.zip` | 2026-04-04 |
-| MassGIS | 2020 Census Towns (`CENSUS2020TOWNS_POLY.shp`) | `shapefiles/census2020/CENSUS2020TOWNS_SHP.zip` | 2026-04-04 |
-| MassGIS | 21E contaminated sites (`C21E_PT.shp`) | `shapefiles/state/c21e_pt.zip` | 2026-04-04 |
-| MassGIS | Solid Waste / Landfills (`SW_LD_POLY.shp`) | `shapefiles/state/solidwaste.zip` | 2026-04-04 |
-| MassGIS | Zone II / IWPA protection areas | `shapefiles/state/zone2_zone1_iwpa.zip` | 2026-04-04 |
-| MassGIS | PWS water-service area polygons | `shapefiles/state/DEP_PWS_Water_Service_Areas.zip` | 2026-04-04 |
-| MassGIS | POTW sewer service areas (WWTP proxy) | `shapefiles/state/DEP_Sewer_Service_Areas.zip` | 2026-04-04 |
-| MassGIS | MWRA service polygons | `shapefiles/state/mwraservice.zip` | 2026-04-04 |
-| MassGIS | BWP major polluters (industrial dischargers) | `shapefiles/state/bwpmajor_pt.zip` | 2026-04-04 |
-| OurAirports | MA airports (filtered) | https://davidmegginson.github.io/ourairports-data/airports.csv | 2026-04-04 |
-| MassDEP | EEA Drinking Water Portal PFAS results | https://eeaonline.eea.state.ma.us/Portal/#!/search/drinking-water | manual — see `data/raw/README_manual_downloads.md` |
-| Manual | Known MA military installations (7 sites) | `data/raw/military_ma_manual.csv` | 2026-04-04 |
+## Maps
 
-All MassGIS layers live under the common prefix
-`https://s3.us-east-1.amazonaws.com/download.massgis.digital.mass.gov/`.
+### Map 1 — Known PFAS detections
+![PFAS Detections](maps/map1_pfas_detections_ma.png)
 
-## Reproducing
+### Map 2 — Predicted risk for untested systems
+![Predicted Risk](maps/map2_predicted_risk.png)
 
-```bash
-pip install -r requirements.txt
-cd pfas-risk-ma
-python scripts/01_clean_pfas_data.py      # Week 0: clean UCMR5
-python scripts/02_preliminary_map.py      # Week 0: Map 1
-python scripts/03_standardize_layers.py   # reproject all layers to EPSG:26986
-python scripts/04_distance_features.py    # distance-to-source features per PWS
-python scripts/05_21e_crossref.py         # 21E priority investigation sites
-python scripts/06_ej_overlay.py           # EJ service-area overlay
-python scripts/07_prepare_model_data.py   # train/predict split
-python scripts/08_train_model.py          # LR + RF, selects best
-python scripts/09_predict_risk.py         # score untested systems
-python scripts/10_ej_disparity_test.py    # chi-square + Mann-Whitney
-python scripts/11_maps_2_3_4.py           # final maps 2, 3, 4
-```
+### Map 3 — Risk × environmental-justice overlay
+![Risk EJ Overlay](maps/map3_risk_ej_overlay.png)
 
-## Methodology notes
+### Map 4 — 21E priority investigation sites
+![21E Priority Sites](maps/map4_21e_priority_sites.png)
 
-- **Units & thresholds**: UCMR5 reports in µg/L; model uses ng/L (ppt). Non-detects
-  are imputed at MRL/2. Federal MCL (2024): PFOA, PFOS each 4.0 ppt. MA MMCL:
-  sum of PFAS6 ≤ 20 ppt (PFAS6 = PFOA, PFOS, PFHxS, PFNA, PFHpA, PFDA).
-- **CRS**: all layers reprojected to EPSG:26986 (MA State Plane, meters) for
-  distance/area computations.
-- **PWSID normalization**: MassGIS uses 7-digit numeric; UCMR5 uses "MA" + 7-digit.
-  Both reconciled to "MA"+zero-padded form at every join.
-- **MWRA flag**: 62 MA towns receive MWRA water/sewer; 30 PWSs in this dataset
-  are MWRA-associated. Kept in training with a flag since their sources (central
-  MA reservoirs) produce distance features that are legitimately different.
-- **WWTP proxy**: using POTW service-area polygon centroids in lieu of a
-  standalone WWTP point layer.
-- **Industrial proxy**: MassDEP BWP major polluters (`BWPMAJOR_PT`, n=2,445).
-  A subset of all industrial PFAS sources, but curated and publicly tracked.
-- **21E text search**: 21E schema does not include structured contaminant
-  fields — keyword search is over the `NAME` column only.
-- **Model choice**: Logistic regression selected over random forest for
-  interpretability; LR test AUC 0.885, 5-fold CV AUC 0.60 (screening level).
+## Methodology
 
-## Week 0 snapshot (from UCMR5)
+### Data sources
 
-- 46,070 PFAS results across 263 MA public water systems.
-- 143 / 263 PWSs showed ≥1 detection.
-- 106 ever exceeded federal MCL; 34 ever exceeded MA MMCL.
+| Dataset | Source |
+|---|---|
+| PFAS monitoring results | [EPA UCMR 5](https://www.epa.gov/dwucmr/occurrence-data-unregulated-contaminant-monitoring-rule) (Jan 2026 release) |
+| PWS source locations | [MassGIS PWSDEP_PT](https://www.mass.gov/info-details/massgis-data-public-water-supplies) |
+| PWS service-area polygons | [MassGIS PWS Water Service Areas](https://www.mass.gov/info-details/massgis-data-massdep-estimated-public-drinking-water-system-service-area-boundaries) |
+| Environmental-justice populations | [MassGIS EJ 2020](https://www.mass.gov/info-details/massgis-data-2020-environmental-justice-populations) |
+| 21E contaminated sites | [MassDEP Tier Classified 21E Sites](https://www.mass.gov/info-details/massgis-data-massdep-tier-classified-21e-sites) |
+| Zone II / IWPA protection areas | [MassGIS DEP-Approved Wellhead Protection Areas](https://www.mass.gov/info-details/massgis-data-dep-approved-wellhead-protection-areas-zone-ii) |
+| Landfills | MassGIS Solid Waste Facilities (`SW_LD_POLY`) |
+| POTW service areas (WWTP proxy) | MassGIS DEP Sewer Service Areas |
+| Industrial dischargers | MassGIS BWP Major Polluters (`BWPMAJOR_PT`) |
+| MWRA service territory | MassGIS `mwraservice` |
+| Airports | [OurAirports](https://ourairports.com/data/), MA subset |
+| Military installations | Hand-curated (7 MA sites) |
 
-## Week 5–6 results
+### Approach
 
-- **1,818 MA PWS source points** geolocated (from MassGIS PWSDEP_PT).
-- **220 / 263** UCMR5 systems matched to a MassGIS source point (training set).
-- **1,598 untested systems** scored by the model (prediction set).
-- **Risk distribution (untested)**: 966 Low · 486 Moderate · 142 High · 4 Very High.
-- **EJ disparity**: statistically significant. 42.9% of untested systems in EJ
-  service areas are classified high-risk vs. 8.1% in non-EJ areas (**5.3×**).
-  - Chi-square: χ² = 65.1, p < 0.0001
-  - Mann-Whitney U (one-sided EJ > non-EJ): p < 0.0001
-- **21E priority investigation sites**: 7 PFAS-relevant 21E sites fall inside
-  the Zone II / IWPA protection area of an UNTESTED public water system.
+1. **Data cleaning.** Standardized UCMR 5 results for Massachusetts
+   (46,070 rows, 263 systems), imputed non-detects at half the minimum
+   reporting level, converted µg/L to ng/L (ppt), and flagged federal
+   MCL (PFOA/PFOS > 4 ppt) and MA MMCL (PFAS6 sum > 20 ppt) exceedances
+   per sample and per system.
 
-## Directory layout
+2. **Feature engineering.** Reprojected every layer to EPSG:26986 (MA
+   State Plane, meters). For each of 1,818 MassGIS PWS source points,
+   computed nearest-neighbor distance to the nearest airport, military
+   installation, landfill, POTW service-area centroid, and major
+   industrial discharger, plus counts of landfills/industrial sites
+   within 1, 3, 5, and 10 km. Aggregated to per-PWSID by taking the
+   closest source, and flagged MWRA-served systems via spatial join.
+
+3. **Risk prediction.** Trained a logistic regression (and a random
+   forest for comparison) on the 220 PWSs present in both UCMR 5 and
+   the MassGIS source layer, with detection as binary target and
+   distance features + groundwater flag + buffer counts as predictors.
+   Class-balanced fit, stratified 80/20 test split, 5-fold CV. LR
+   selected for interpretability. Applied to the 1,598 untested PWSs.
+
+4. **21E cross-reference.** Spatially joined 2,287 MassDEP 21E sites
+   into Zone II and IWPA protection polygons, keyword-scored the site
+   name column for PFAS-relevant activity (AFFF / fire training, fuel
+   / UST, dry cleaning, landfill, metal plating, military, etc.), and
+   filtered to sites associated with an untested public water system.
+
+5. **Environmental-justice analysis.** Overlaid PWS service-area
+   polygons on the MassGIS 2020 EJ population block groups, computed
+   per-PWS area-fraction overlap and criterion flags, then tested
+   whether predicted-risk distributions differ between EJ and non-EJ
+   service areas (chi-square on a high-risk × EJ contingency table and
+   one-sided Mann-Whitney U).
+
+### Important limitations
+
+- **Screening-level only.** Not a risk assessment or compliance
+  determination, and not a substitute for site-specific sampling.
+- **Proximity is crude.** Distance-based features do not account for
+  hydrogeologic transport, groundwater flow direction, or actual
+  contaminant fate.
+- **Small training set.** 220 PWSs, 5-fold CV AUC ≈ 0.60 — usable for
+  prioritization, not prediction of specific concentrations.
+- **MWRA systems have a fundamentally different risk profile.** MWRA
+  source intakes are in central-MA reservoirs, 60+ miles from the
+  Boston-metro communities they serve. They are included with an
+  `is_mwra` flag but their distance features are not directly
+  comparable to independent groundwater sources.
+- **21E keyword flagging is imperfect.** The MassDEP schema has no
+  structured contaminant column, so the search runs over site names
+  only — expect both false positives (e.g., unrelated gas stations) and
+  false negatives (unlabeled activity).
+- **EJ overlay uses service-area polygons**, which are MassDEP estimates
+  of served area, not parcel-level hookups.
+- **Non-detect imputation at MRL/2** is standard but introduces
+  uncertainty in concentration estimates.
+
+See the [technical memo](report/pfas_technical_memo.pdf) for the
+complete methodology and results discussion.
+
+## Interactive application
+
+A Streamlit app (`app/streamlit_app.py`) lets you select any MA town or
+public water system and see PFAS detection status, predicted risk score,
+nearest potential sources with distances, EJ overlap, and 21E priority
+sites in the area. See `DEPLOYMENT.md` for Streamlit Community Cloud
+setup.
+
+## Repository structure
 
 ```
 pfas-risk-ma/
+├── app/                      # Streamlit application
+│   ├── streamlit_app.py
+│   ├── data/                 # Lightweight data for deployment
+│   └── requirements.txt
 ├── data/
-│   ├── raw/             # UCMR5, MassGIS shapefiles, CSVs
-│   └── cleaned/         # .gpkg layers (EPSG:26986), model data, predictions
-├── scripts/             # 01–11, numbered pipeline
-├── maps/                # Map 1–4 + model_evaluation + feature_importance
+│   ├── raw/                  # Original downloaded datasets
+│   └── cleaned/              # Processed analysis-ready data (.gpkg + .csv)
+├── maps/                     # Static map outputs (PNG + PDF) + model plots
+├── report/                   # Technical memo (.docx + .pdf)
+├── scripts/                  # 01-12 numbered pipeline
+├── .streamlit/config.toml
+├── DEPLOYMENT.md
 ├── README.md
 └── requirements.txt
 ```
+
+## Reproduce this analysis
+
+```bash
+git clone https://github.com/<username>/pfas.git
+cd pfas/pfas-risk-ma
+pip install -r requirements.txt
+
+# Run the pipeline in order
+python scripts/01_clean_pfas_data.py
+python scripts/02_preliminary_map.py
+python scripts/03_standardize_layers.py
+python scripts/04_distance_features.py
+python scripts/05_21e_crossref.py
+python scripts/06_ej_overlay.py
+python scripts/07_prepare_model_data.py
+python scripts/08_train_model.py
+python scripts/09_predict_risk.py
+python scripts/10_ej_disparity_test.py
+python scripts/11_maps_2_3_4.py
+python scripts/12_prepare_app_data.py
+
+# Launch the app locally
+streamlit run app/streamlit_app.py
+```
+
+## Author
+
+**Maahum Yousuf, EIT** · Boston, MA
+
+## License
+
+Code available under the MIT License. Underlying data (EPA, MassGIS,
+MassDEP) is public domain.

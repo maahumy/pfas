@@ -1,0 +1,22 @@
+EJ DISPARITY ANALYSIS — UNTESTED MASSACHUSETTS PWS
+========================================================
+Risk score threshold for 'high risk': > 0.5
+N = 1598 untested systems with valid EJ and risk values
+
+Contingency table:
+serves_ej_community  EJ Community  Non-EJ
+high_risk                                
+High Risk                      21     125
+Lower Risk                     28    1424
+
+Chi-square: chi2 = 65.11, dof = 1, p = 0.0000
+  STATISTICALLY SIGNIFICANT (alpha=0.05): high-risk systems are disproportionately in EJ communities.
+
+Mann-Whitney U (one-sided, EJ > non-EJ): U = 55856, p = 0.0000
+  EJ:     mean = 0.412, median = 0.427, n = 49
+  Non-EJ: mean = 0.231, median = 0.203, n = 1549
+
+Proportion classified as high risk:
+  EJ communities:     42.9%
+  Non-EJ communities: 8.1%
+  Ratio (EJ / Non-EJ): 5.31
