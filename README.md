@@ -25,7 +25,7 @@ environmental justice criteria to identify high-priority untested systems.
 ## Maps
 
 ### Map 1 — Known PFAS detections
-![PFAS Detections](maps/map1_pfas_detections_ma.png)
+![PFAS Detections](pfas-risk-ma/maps/map1_pfas_detections_ma.png)
 
 ### Map 2 — Predicted risk for untested systems
 ![Predicted Risk](maps/map2_predicted_risk.png)
