@@ -122,8 +122,7 @@ complete methodology and results discussion.
 A Streamlit app (`pfas-risk-ma/app/streamlit_app.py`) lets you select any MA town or
 public water system and see PFAS detection status, predicted risk score,
 nearest potential sources with distances, EJ overlap, and 21E priority
-sites in the area. See `DEPLOYMENT.md` for Streamlit Community Cloud
-setup.
+sites in the area. See https://ej-risk-prediction-model-pfas-ma.streamlit.app/ for access. 
 
 ## Repository structure
 
