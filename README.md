@@ -28,13 +28,13 @@ environmental justice criteria to identify high-priority untested systems.
 ![PFAS Detections](pfas-risk-ma/maps/map1_pfas_detections_ma.png)
 
 ### Map 2 — Predicted risk for untested systems
-![Predicted Risk](maps/map2_predicted_risk.png)
+![Predicted Risk](pfas-risk-ma/maps/map2_predicted_risk.png)
 
 ### Map 3 — Risk × environmental-justice overlay
-![Risk EJ Overlay](maps/map3_risk_ej_overlay.png)
+![Risk EJ Overlay](pfas-risk-ma/maps/map3_risk_ej_overlay.png)
 
 ### Map 4 — 21E priority investigation sites
-![21E Priority Sites](maps/map4_21e_priority_sites.png)
+![21E Priority Sites](pfas-risk-ma/maps/map4_21e_priority_sites.png)
 
 ## Methodology
 
