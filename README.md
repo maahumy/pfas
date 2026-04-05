@@ -114,12 +114,12 @@ environmental justice criteria to identify high-priority untested systems.
 - **Non-detect imputation at MRL/2** is standard but introduces
   uncertainty in concentration estimates.
 
-See the [technical memo](report/pfas_technical_memo.pdf) for the
+See the [technical memo](pfas-risk-ma/report/pfas_technical_memo.pdf) for the
 complete methodology and results discussion.
 
 ## Interactive application
 
-A Streamlit app (`app/streamlit_app.py`) lets you select any MA town or
+A Streamlit app (`pfas-risk-ma/app/streamlit_app.py`) lets you select any MA town or
 public water system and see PFAS detection status, predicted risk score,
 nearest potential sources with distances, EJ overlap, and 21E priority
 sites in the area. See `DEPLOYMENT.md` for Streamlit Community Cloud
