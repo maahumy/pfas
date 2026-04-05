@@ -149,8 +149,8 @@ def make_static_map(towns, joined):
     )
 
     plt.tight_layout()
-    png = MAPS / "pfas_detections_ma.png"
-    pdf = MAPS / "pfas_detections_ma.pdf"
+    png = MAPS / "map1_pfas_detections_ma.png"
+    pdf = MAPS / "map1_pfas_detections_ma.pdf"
     plt.savefig(png, dpi=200, bbox_inches="tight")
     plt.savefig(pdf, bbox_inches="tight")
     plt.close(fig)
@@ -214,7 +214,7 @@ def make_interactive_map(joined):
     legend_html += "</div>"
     m.get_root().html.add_child(folium.Element(legend_html))
 
-    out = MAPS / "pfas_detections_ma_interactive.html"
+    out = MAPS / "map1_pfas_detections_ma_interactive.html"
     m.save(str(out))
     print(f"Wrote {out}")
 
