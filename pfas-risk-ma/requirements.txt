@@ -1,0 +1,11 @@
+pandas>=2.0
+geopandas>=0.14
+matplotlib>=3.8
+folium>=0.15
+requests
+openpyxl
+fiona
+pyproj
+shapely
+scikit-learn
+streamlit
